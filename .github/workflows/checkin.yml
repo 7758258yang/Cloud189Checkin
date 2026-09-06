@@ -35,7 +35,7 @@ jobs:
           key: ${{ runner.os }}-cache-token
           restore-keys: ${{ runner.os }}-cache-token-
       - name: 🔧 Init secrets
-        uses: shine1594/secrets-to-env-action@v2.0.0
+        uses: shine1594/secrets-to-env-action@master
         with:
           secrets: ${{ toJSON(secrets) }}
           secrets_env: production
