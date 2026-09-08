@@ -39,7 +39,7 @@ jobs:
           restore-keys: cloud189-token-
 
       - name: 🔧 Init secrets
-        uses: shine1594/secrets-to-env-action@v1.1.0
+        uses: shine1594/secrets-to-env-action@master
         with:
           secrets: ${{ toJSON(secrets) }}
           secrets_env: production
