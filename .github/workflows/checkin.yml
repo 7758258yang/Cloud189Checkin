@@ -17,12 +17,12 @@ jobs:
         run: sleep $((RANDOM % 301))
 
       - name: 🔌 Check out code
-        uses: actions/checkout@main
+        uses: actions/checkout@v4
 
       - name: 🔨 Setup Node.js environment
-        uses: actions/setup-node@main
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: npm
 
       - name: 👾 Check if Debug is true
@@ -39,7 +39,7 @@ jobs:
           restore-keys: cloud189-token-
 
       - name: 🔧 Init secrets
-        uses: shine1594/secrets-to-env-action@master
+        uses: shine1594/secrets-to-env-action@v1.1.0
         with:
           secrets: ${{ toJSON(secrets) }}
           secrets_env: production
@@ -50,7 +50,7 @@ jobs:
         run: npm install
 
       - name: 🚀 Run
-        uses: nick-fields/retry@master
+        uses: nick-fields/retry@v3
         with:
           timeout_minutes: 30
           max_attempts: 3
@@ -65,6 +65,7 @@ jobs:
       - name: 📹 Save cached Cookie
         if: always() && env.TOKEN_HASH != ''
         uses: actions/cache/save@v4
+        continue-on-error: true
         with:
           path: .token
           key: cloud189-token-${{ env.TOKEN_HASH }}
@@ -80,7 +81,7 @@ jobs:
           git push
 
       - name: 🎉 Delete old workflow run
-        uses: Mattraks/delete-workflow-runs@main
+        uses: Mattraks/delete-workflow-runs@v2
         with:
           token: ${{ github.token }}
           repository: ${{ github.repository }}
