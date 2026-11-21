@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     # ⚠️ 若你没在 Settings → Environments 里创建名为 user 的环境，请保持这一行注释，
     #    否则 job 会直接失败："Value 'user' for environment is not valid"。
-    # environment: user
+     environment: user
 
     steps:
       - name: 🔀 random delay 0-300 seconds
