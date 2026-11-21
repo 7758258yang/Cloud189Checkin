@@ -1,4 +1,5 @@
-name: Cloud check in action
+name: 天翼云盘签到
+
 on:
   push:
     branches:
@@ -7,11 +8,20 @@ on:
     types: started
   workflow_dispatch:
   schedule:
-    - cron: 35 2 * * *
+    - cron: '35 2 * * *'   # UTC 时间；北京时间 = UTC+8，即每天 10:35
+
+# 新增：给 GITHUB_TOKEN 显式授权（新版仓库默认是只读，会导致 push / 删除运行记录失败）
+permissions:
+  contents: write   # “Keep Running” 步骤需要提交并 push
+  actions: write    # “Delete old workflow run” 步骤需要删除运行记录
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    environment: user
+    # ⚠️ 若你没在 Settings → Environments 里创建名为 user 的环境，请保持这一行注释，
+    #    否则 job 会直接失败："Value 'user' for environment is not valid"。
+    # environment: user
+
     steps:
       - name: 🔀 random delay 0-300 seconds
         run: sleep $((RANDOM % 301))
@@ -23,13 +33,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
+          cache: npm   # ⚠️ 仓库根目录必须有 package-lock.json，否则此步会报 “lock file not found”
 
       - name: 👾 Check if Debug is true
+        # ⚠️ 需在 Settings → Secrets and variables → Variables 里建一个 debug = 1 的变量才会生效
         if: vars.debug == '1'
         run: |
           echo "CLOUD189_VERBOSE=1" >> $GITHUB_ENV
-      
+
       - name: 📹 Restore cached Cookie
         id: cache-cookie-restore
         uses: actions/cache/restore@v4
@@ -39,6 +50,7 @@ jobs:
           restore-keys: cloud189-token-
 
       - name: 🔧 Init secrets
+        # ⚠️ @master 指向上游分支，不稳定；建议固定到某个 release tag 或 commit SHA
         uses: shine1594/secrets-to-env-action@master
         with:
           secrets: ${{ toJSON(secrets) }}
@@ -77,7 +89,7 @@ jobs:
           git config --local user.name "${{ github.actor }}"
           git remote set-url origin https://${{ github.actor }}:${{ github.token }}@github.com/${{ github.repository }}
           git pull --rebase --autostash
-          git commit --allow-empty -m "Keep Running..."
+          git commit --allow-empty -m "Keep Running..." || true
           git push
 
       - name: 🎉 Delete old workflow run
